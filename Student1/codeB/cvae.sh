@@ -1,0 +1,1 @@
+python ./codeP/main.py --dataset mnist --model cvae --otherOptions default
