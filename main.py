@@ -1,23 +1,30 @@
 import argparse
+import subprocess
 import os
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--dataset", required=True, help="Path to dataset folder")
-parser.add_argument("--model", required=True, help="Model name")
-parser.add_argument("--otherOptions", default="", help="Other options")
+parser = argparse.ArgumentParser(description="Unified CLI for all projects")
+parser.add_argument('--project', type=str, required=True, help="Project name: CHATBOT, GAN, ImageCls, SPEECH")
+parser.add_argument('--dataset', type=str, required=True, help="Dataset path relative to the project folder")
+parser.add_argument('--model', type=str, required=True, help="Model name to use")
+parser.add_argument('--mode', type=str, default='train', help="Mode: train/test/predict")
+parser.add_argument('--otherOptions', type=str, default='', help="Additional options for the project")
 args = parser.parse_args()
 
-print(f"Dataset path: {args.dataset}")
-print(f"Model: {args.model}")
-print(f"Other options: {args.otherOptions}")
+project_folder = os.path.join(os.getcwd(), args.project)
+project_main = os.path.join(project_folder, 'codeP', 'main.py')
 
-# Example check: dataset folders exist
-train_path = os.path.join(args.dataset, "training")
-test_path = os.path.join(args.dataset, "testing")
+if not os.path.exists(project_main):
+    raise FileNotFoundError(f"Project main.py not found in {project_main}")
 
-if not os.path.exists(train_path) or not os.path.exists(test_path):
-    raise FileNotFoundError("Training or testing folder not found.")
+cmd = [
+    "python",
+    project_main,
+    "--dataset", args.dataset,
+    "--model", args.model,
+    "--mode", args.mode
+]
 
-print("Training model...")
-print("Testing model...")
-print("Done! Results saved.")
+if args.otherOptions:
+    cmd.extend(args.otherOptions.split())
+
+subprocess.run(cmd)
